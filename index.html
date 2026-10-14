@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>لوحة تحكم الاستيراد والتكاليف</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+  <div class="brand"><div class="brand-icon">▦</div><div><b>ImportFlow</b><small>إدارة الاستيراد والتكاليف</small></div></div>
+  <div class="side-label">القائمة الرئيسية</div>
+  <button class="nav active" data-page="dashboard">▦ <span>لوحة التحكم</span></button>
+  <button class="nav" data-page="shipments">⇄ <span>سجل الحركات والشحنات</span></button>
+  <button class="nav" data-page="orders">▤ <span>أوامر الشراء</span></button>
+  <button class="nav" data-page="costs">◈ <span>تحليل التكاليف</span></button>
+  <button class="nav" data-page="reports">▥ <span>التقارير والتصدير</span></button>
+  <div class="side-bottom"><div class="status-dot"></div><span>وضع محلي — بياناتك على جهازك</span></div>
+</aside>
+<main class="main">
+<header class="topbar"><div><div class="eyebrow">مركز المتابعة والتحليل</div><h1 id="pageTitle">لوحة التحكم</h1></div><div class="top-actions"><span class="date-chip" id="today"></span><label class="upload-btn">＋ استيراد ملف Excel<input id="fileInput" type="file" accept=".xlsx,.xls,.xlsm"></label></div></header>
+<section class="welcome"><div><div class="welcome-tag">لوحة ذكاء الأعمال</div><h2>كل بيانات الاستيراد في مكان واحد.</h2><p>تابع أوامر الشراء والشحنات والتكاليف، وابحث في السجلات واستخرج التقارير بسهولة.</p></div><div class="welcome-art">▥<span>↗</span></div></section>
+<div id="notice" class="notice">تعرض اللوحة بيانات تجريبية للتوضيح. ارفع ملف الإكسيل لعرض بياناتك الفعلية. لا تُرفع الملفات إلى أي خادم.</div>
+<section id="dashboard" class="page">
+<div class="kpis">
+ <article class="kpi"><div class="kpi-top"><span>إجمالي السجلات</span><span class="kpi-icon blue">▤</span></div><strong id="kRecords">0</strong><small>حركة مسجلة في الملف</small></article>
+ <article class="kpi"><div class="kpi-top"><span>أوامر الشراء</span><span class="kpi-icon purple">▣</span></div><strong id="kOrders">0</strong><small>أوامر شراء مختلفة</small></article>
+ <article class="kpi"><div class="kpi-top"><span>إجمالي القيمة بالجنيه</span><span class="kpi-icon green">جـ</span></div><strong id="kValue">0</strong><small>حسب البيانات المتاحة</small></article>
+ <article class="kpi"><div class="kpi-top"><span>حركات المصروفات</span><span class="kpi-icon orange">↗</span></div><strong id="kExpenses">0</strong><small>مصروفات ورسوم مسجلة</small></article>
+</div>
+<div class="grid-two">
+ <article class="panel"><div class="panel-head"><div><h3>قيمة الحركات حسب النوع</h3><p>توزيع تقريبي للقيم المسجلة</p></div><span class="panel-mark">01</span></div><div class="chart-wrap"><canvas id="typeChart"></canvas></div></article>
+ <article class="panel"><div class="panel-head"><div><h3>أكثر أوامر الشراء تكرارًا</h3><p>حسب عدد السجلات في الملف</p></div><span class="panel-mark">02</span></div><div class="chart-wrap"><canvas id="ordersChart"></canvas></div></article>
+</div>
+<article class="panel"><div class="panel-head"><div><h3>أحدث الحركات</h3><p>نظرة سريعة على آخر السجلات المحملة</p></div><button class="text-btn" data-goto="shipments">عرض كل السجلات ←</button></div><div class="table-scroll"><table><thead><tr><th>أمر الشراء</th><th>رقم الرسالة</th><th>نوع الحركة</th><th>البيان</th><th>العملة</th><th>القيمة بالجنيه</th><th>التاريخ</th></tr></thead><tbody id="recentRows"></tbody></table></div></article>
+</section>
+<section id="shipments" class="page hidden">
+<article class="panel"><div class="panel-head"><div><h3>سجل الحركات والشحنات</h3><p>ابحث، صفِّ النتائج، ثم صدّر البيانات المعروضة.</p></div><button class="export-btn" id="exportCsv">تصدير CSV ↓</button></div>
+<div class="filters"><input id="search" placeholder="ابحث برقم الأمر أو الفاتورة أو الصنف..."><select id="typeFilter"><option value="">كل أنواع الحركة</option></select><select id="currencyFilter"><option value="">كل العملات</option></select><select id="orderFilter"><option value="">كل أوامر الشراء</option></select></div>
+<div class="table-scroll"><table><thead><tr><th>أمر الشراء</th><th>رقم الرسالة</th><th>رقم الفاتورة</th><th>نوع الحركة</th><th>كود الصنف</th><th>البيان</th><th>الكمية</th><th>العملة</th><th>القيمة بالعملة</th><th>القيمة بالجنيه</th><th>التاريخ</th></tr></thead><tbody id="allRows"></tbody></table></div><div class="table-foot" id="rowCount"></div></article>
+</section>
+<section id="orders" class="page hidden"><article class="panel"><div class="panel-head"><div><h3>ملخص أوامر الشراء</h3><p>تجميع السجلات حسب رقم أمر الشراء.</p></div></div><div class="table-scroll"><table><thead><tr><th>رقم أمر الشراء</th><th>عدد السجلات</th><th>عدد الرسائل</th><th>إجمالي القيمة بالجنيه</th><th>أنواع الحركة</th></tr></thead><tbody id="orderRows"></tbody></table></div></article></section>
+<section id="costs" class="page hidden"><div class="kpis"><article class="kpi"><div class="kpi-top"><span>قيمة الفواتير بالجنيه</span><span class="kpi-icon blue">جـ</span></div><strong id="invoiceValue">0</strong><small>حركات نوعها فاتورة</small></article><article class="kpi"><div class="kpi-top"><span>قيمة المصروفات بالجنيه</span><span class="kpi-icon orange">↗</span></div><strong id="expenseValue">0</strong><small>حركات نوعها مصروف</small></article><article class="kpi"><div class="kpi-top"><span>عدد الأصناف المختلفة</span><span class="kpi-icon green">◈</span></div><strong id="skuCount">0</strong><small>حسب كود الصنف</small></article><article class="kpi"><div class="kpi-top"><span>العملات المستخدمة</span><span class="kpi-icon purple">◎</span></div><strong id="currencyCount">0</strong><small>عملات مختلفة</small></article></div><article class="panel"><div class="panel-head"><div><h3>تفاصيل التكلفة حسب نوع الحركة</h3><p>القيمة بالعملة المحلية وفق العمود الموجود في ملفك.</p></div></div><div class="table-scroll"><table><thead><tr><th>نوع الحركة</th><th>عدد السجلات</th><th>إجمالي القيمة بالجنيه</th><th>متوسط قيمة السجل</th></tr></thead><tbody id="costRows"></tbody></table></div></article></section>
+<section id="reports" class="page hidden"><article class="panel report-panel"><div class="report-symbol">⇩</div><h3>تصدير التقارير</h3><p>نزّل السجلات الحالية بصيغة CSV متوافقة مع Excel. يمكنك أولًا استخدام الفلاتر في صفحة سجل الحركات لتصدير جزء محدد من البيانات.</p><div class="report-actions"><button class="export-btn" id="exportAll">تصدير كل السجلات CSV ↓</button><button class="secondary-btn" id="exportOrders">تصدير ملخص أوامر الشراء ↓</button></div></article><article class="panel"><h3>كيف تستخدم الموقع؟</h3><ol class="howto"><li>اضغط على «استيراد ملف Excel» أعلى الصفحة.</li><li>اختر ملفك، وسيقرأ الموقع ورقة <b>Statement</b> إذا كانت موجودة، أو أول ورقة في الملف.</li><li>تُقرأ عناوين الأعمدة من الصف الثالث في ورقة Statement، بما يتوافق مع قالبك الحالي.</li><li>استخدم البحث والفلاتر، ثم صدّر النتائج المطلوبة.</li></ol><p class="privacy">الخصوصية: تتم معالجة الملف داخل المتصفح ولا يتم إرساله إلى خادم. البيانات لا تُشارك تلقائيًا بين أجهزة المستخدمين.</p></article></section>
+<footer>ImportFlow <span>•</span> لوحة متابعة الاستيراد والتكاليف</footer>
+</main></div>
+<script src="app.js"></script>
+</body></html>
